@@ -1,0 +1,42 @@
+service: signaldetection
+
+provider:
+  name: aws
+  runtime: python3.9
+  region: us-east-1
+  timeout: 30
+
+plugins:
+  - serverless-offline
+
+custom:
+  serverless-offline:
+    httpPort: 3000
+    lambdaPort: 3002
+    timeout: 30
+
+functions:
+
+  detectSignals:
+    handler: handler.detect_signals
+    timeout: 30
+    events:
+      - http:
+          path: /detect
+          method: get
+
+  getSignals:
+    handler: handler.get_signals
+    timeout: 30
+    events:
+      - http:
+          path: /signals
+          method: get
+
+  healthCheck:
+    handler: handler.health_check
+    timeout: 30
+    events:
+      - http:
+          path: /health
+          method: get

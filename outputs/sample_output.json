@@ -1,0 +1,102 @@
+[
+  {
+    "company": "Acme Corp",
+    "signal_type": "ats_modernization",
+    "source_url": "https://example.com/acme-workday",
+    "matched_keywords": [
+      "workday",
+      "ats migration",
+      "hr transformation",
+      "recruitment automation",
+      "hiring platform upgrade",
+      "talent management system"
+    ],
+    "matched_tools": [
+      "workday"
+    ],
+    "modernization_stage": "unknown",
+    "signal_score": 100,
+    "detected_at": "2026-04-18T18:11:20.641016",
+    "reason": "ATS/HR tech modernization signal detected with 6 keyword(s)",
+    "data_source": "sample"
+  },
+  {
+    "company": "TechStart deploys",
+    "signal_type": "ats_modernization",
+    "source_url": "https://example.com/techstart-successfactors",
+    "matched_keywords": [
+      "successfactors",
+      "ats migration",
+      "recruitment automation",
+      "applicant tracking"
+    ],
+    "matched_tools": [
+      "successfactors"
+    ],
+    "modernization_stage": "implementing",
+    "signal_score": 90,
+    "detected_at": "2026-04-18T18:11:20.641367",
+    "reason": "ATS/HR tech modernization signal detected with 4 keyword(s)",
+    "data_source": "sample"
+  },
+  {
+    "company": "GlobalBank evaluating",
+    "signal_type": "ats_modernization",
+    "source_url": "https://example.com/globalbank-ats",
+    "matched_keywords": [
+      "workday",
+      "ats migration",
+      "hr transformation",
+      "recruitment automation",
+      "hiring platform upgrade",
+      "hr tech"
+    ],
+    "matched_tools": [
+      "workday",
+      "greenhouse"
+    ],
+    "modernization_stage": "planning",
+    "signal_score": 100,
+    "detected_at": "2026-04-18T18:11:20.641667",
+    "reason": "ATS/HR tech modernization signal detected with 6 keyword(s)",
+    "data_source": "sample"
+  },
+  {
+    "company": "RetailChain completes",
+    "signal_type": "ats_modernization",
+    "source_url": "https://example.com/retailchain-lever",
+    "matched_keywords": [
+      "recruitment automation",
+      "hiring platform upgrade",
+      "applicant tracking",
+      "hr tech"
+    ],
+    "matched_tools": [
+      "lever"
+    ],
+    "modernization_stage": "completed",
+    "signal_score": 90,
+    "detected_at": "2026-04-18T18:11:20.642729",
+    "reason": "ATS/HR tech modernization signal detected with 4 keyword(s)",
+    "data_source": "sample"
+  },
+  {
+    "company": "FinanceCo planning",
+    "signal_type": "ats_modernization",
+    "source_url": "https://example.com/finco-icims",
+    "matched_keywords": [
+      "successfactors",
+      "hr transformation",
+      "hiring platform upgrade"
+    ],
+    "matched_tools": [
+      "successfactors",
+      "icims"
+    ],
+    "modernization_stage": "planning",
+    "signal_score": 80,
+    "detected_at": "2026-04-18T18:11:20.643159",
+    "reason": "ATS/HR tech modernization signal detected with 3 keyword(s)",
+    "data_source": "sample"
+  }
+]

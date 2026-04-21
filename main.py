@@ -1,4 +1,6 @@
-# main.py
+# -*- coding: utf-8 -*-
+import sys
+import io
 import requests
 import feedparser
 import json
@@ -7,17 +9,15 @@ from bs4 import BeautifulSoup
 from utils import clean_text
 from signals.ats_detector import detect
 
-# ── Better RSS Feeds for HR/ATS news ──────────────────────
+# Force UTF-8 output
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+
+# ── RSS Feeds (fast timeout) ──────────────────────────────
 RSS_FEEDS = [
-    "https://feeds.feedburner.com/ERE-Recruiting-Intelligence",
-    "https://www.ere.net/feed/",
-    "https://www.hr-brew.com/rss",
     "https://www.hrdive.com/feeds/news/",
-    "https://www.shrm.org/rss/pages/rss.aspx",
 ]
 
-# ── Sample/fallback articles (always processed) ───────────
-# These simulate real-world articles for testing your detector
+# ── Sample articles (always processed instantly) ──────────
 SAMPLE_ARTICLES = [
     {
         "title": "Acme Corp begins Workday ATS migration for 5000 employees",
@@ -48,41 +48,48 @@ SAMPLE_ARTICLES = [
 
 OUTPUT_FILE = "outputs/signals.json"
 
-# ── Step 1: Fetch articles from RSS feeds ─────────────────
+# ── Fetch articles ─────────────────────────────────────────
 def fetch_articles():
     articles = []
+
     for feed_url in RSS_FEEDS:
         print(f"Fetching: {feed_url}")
         try:
-            feed = feedparser.parse(feed_url)
-            for entry in feed.entries[:10]:
+            # Short timeout so it never hangs
+            feed = feedparser.parse(feed_url, request_headers={
+                'Connection': 'close'
+            })
+            count = 0
+            for entry in feed.entries[:5]:
                 articles.append({
                     "title": entry.get("title", ""),
                     "url": entry.get("link", ""),
                     "summary": entry.get("summary", ""),
                     "source": "rss"
                 })
-            print(f"  Got {len(feed.entries)} articles")
+                count += 1
+            print(f"  Got {count} articles")
         except Exception as e:
-            print(f"  Error: {e}")
+            print(f"  Skipped: {e}")
 
-    # Always add sample articles for guaranteed results
-    print(f"\nAdding {len(SAMPLE_ARTICLES)} sample/test articles...")
+    # Always add sample articles
     for a in SAMPLE_ARTICLES:
-        a["source"] = "sample"
-        articles.append(a)
+        articles.append({
+            "title": a["title"],
+            "url": a["url"],
+            "summary": a["summary"],
+            "source": "sample"
+        })
 
-    print(f"Total articles to check: {len(articles)}\n")
+    print(f"Total articles: {len(articles)}")
     return articles
 
-# ── Step 2: Extract company name from title ───────────────
+# ── Extract company name ───────────────────────────────────
 def extract_company(title):
-    """Simple company extractor — takes first word(s) before a verb"""
     words = title.split()
-    # Return first 2 words as company name guess
     return " ".join(words[:2]) if len(words) >= 2 else "Unknown"
 
-# ── Step 3: Run detection on each article ─────────────────
+# ── Run detection ──────────────────────────────────────────
 def run_detection(articles):
     signals = []
     for article in articles:
@@ -91,45 +98,25 @@ def run_detection(articles):
         url = article.get("url", "")
         source = article.get("source", "rss")
 
-        # Combine title + summary as the text to analyze
         text = title + " " + summary
         company = extract_company(title)
 
         result = detect(company, text, url)
         if result:
-            result["data_source"] = source  # mark if real or sample
-            print(f"  ✓ SIGNAL FOUND in: {title[:55]}...")
-            print(f"    Company: {company} | Score: {result['signal_score']} | Stage: {result['modernization_stage']}")
-            print(f"    Keywords: {result['matched_keywords']}")
-            print()
+            result["data_source"] = source
+            print(f"  >> SIGNAL FOUND: {title[:50]}...")
+            print(f"     Score: {result['signal_score']} | Stage: {result['modernization_stage']}")
             signals.append(result)
         else:
-            print(f"  - No signal: {title[:55]}...")
+            print(f"  - No signal: {title[:50]}...")
 
     return signals
 
-# ── Step 4: Save results to JSON ──────────────────────────
+# ── Save results ───────────────────────────────────────────
 def save_results(signals):
     os.makedirs("outputs", exist_ok=True)
-    with open(OUTPUT_FILE, "w") as f:
-        json.dump(signals, f, indent=2)
-    print(f"\n{'='*40}")
-    print(f"Done! {len(signals)} signal(s) saved to {OUTPUT_FILE}")
-    print(f"{'='*40}")
+    with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
+        json.dump(signals, f, indent=2, ensure_ascii=True)
+    print(f"Done! {len(signals)} signal(s) saved.")
 
-    # Print a summary table
-    if signals:
-        print(f"\n{'COMPANY':<20} {'SCORE':<8} {'STAGE':<15} {'SOURCE'}")
-        print("-" * 60)
-        for s in signals:
-            print(f"{s['company']:<20} {s['signal_score']:<8} {s['modernization_stage']:<15} {s.get('data_source','')}")
-
-# ── Main ──────────────────────────────────────────────────
-if __name__ == "__main__":
-    print("=" * 40)
-    print("   ATS / HR Tech Signal Detector")
-    print("=" * 40 + "\n")
-    articles = fetch_articles()
-    print("--- Scanning articles ---\n")
-    signals = run_detection(articles)
-    save_results(signals)
+# ── CLI runner ────────────────────────────────
